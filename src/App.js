@@ -15,6 +15,8 @@ import Geography from "./scenes/geography";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
+import CategoryManager from "./scenes/team/category-index";
+import ProductManager from "./scenes/team/product-index";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -40,6 +42,8 @@ function App() {
               <Route path="/faq" element={<FAQ />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/geography" element={<Geography />} />
+              <Route path="/category-manager" element={<CategoryManager />} />
+              <Route path="/product-manager" element={<ProductManager />} />
             </Routes>
           </main>
         </div>

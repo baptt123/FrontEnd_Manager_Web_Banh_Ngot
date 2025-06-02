@@ -1,34 +1,61 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  useTheme,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataTeam } from "../../data/mockData";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import Header from "../../components/Header";
+import { getUsers, deleteUser } from "../../api/storeUserAPI.js";
 
 const Team = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load users từ backend
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await getUsers();
+      // Lọc để lấy ra những user chưa bị xóa
+      const filteredUsers = data.filter((user) => user.deleted === 0);
+      setUsers(filteredUsers);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Xoá user và cập nhật state mà không cần gọi lại toàn bộ API
+  const handleDelete = async (id) => {
+    try {
+      await deleteUser(id);
+      setUsers((prevUsers) => prevUsers.filter((user) => user.userId !== id));
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
   const columns = [
-    { field: "id", headerName: "ID" },
+    { field: "userId", headerName: "ID", width: 70 },
     {
-      field: "name",
+      field: "fullName",
       headerName: "Name",
       flex: 1,
       cellClassName: "name-column--cell",
-    },
-    {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "phone",
-      headerName: "Phone Number",
-      flex: 1,
     },
     {
       field: "email",
@@ -36,10 +63,10 @@ const Team = () => {
       flex: 1,
     },
     {
-      field: "accessLevel",
+      field: "role",
       headerName: "Access Level",
       flex: 1,
-      renderCell: ({ row: { access } }) => {
+      renderCell: ({ row: { role } }) => {
         return (
           <Box
             width="60%"
@@ -48,21 +75,39 @@ const Team = () => {
             display="flex"
             justifyContent="center"
             backgroundColor={
-              access === "admin"
+              role === "admin"
                 ? colors.greenAccent[600]
-                : access === "manager"
+                : role === "manager"
                 ? colors.greenAccent[700]
                 : colors.greenAccent[700]
             }
             borderRadius="4px"
           >
-            {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
-            {access === "manager" && <SecurityOutlinedIcon />}
-            {access === "user" && <LockOpenOutlinedIcon />}
+            {role === "admin" && <AdminPanelSettingsOutlinedIcon />}
+            {role === "manager" && <SecurityOutlinedIcon />}
+            {role === "user" && <LockOpenOutlinedIcon />}
             <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
-              {access}
+              {role}
             </Typography>
           </Box>
+        );
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 120,
+      sortable: false,
+      renderCell: ({ row: { userId } }) => {
+        return (
+          <Button
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={() => handleDelete(userId)}
+          >
+            Delete
+          </Button>
         );
       },
     },
@@ -71,37 +116,53 @@ const Team = () => {
   return (
     <Box m="20px">
       <Header title="TEAM" subtitle="Managing the Team Members" />
-      <Box
-        m="40px 0 0 0"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-        }}
-      >
-        <DataGrid checkboxSelection rows={mockDataTeam} columns={columns} />
-      </Box>
+      {loading ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="60vh"
+        >
+          <CircularProgress color="secondary" />
+        </Box>
+      ) : (
+        <Box
+          m="40px 0 0 0"
+          height="75vh"
+          sx={{
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              borderBottom: "none",
+            },
+            "& .name-column--cell": {
+              color: colors.greenAccent[300],
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.blueAccent[700],
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: colors.primary[400],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "none",
+              backgroundColor: colors.blueAccent[700],
+            },
+            "& .MuiCheckbox-root": {
+              color: `${colors.greenAccent[200]} !important`,
+            },
+          }}
+        >
+          <DataGrid
+            checkboxSelection
+            rows={users}
+            columns={columns}
+            getRowId={(row) => row.userId}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

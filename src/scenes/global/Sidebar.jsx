@@ -16,6 +16,7 @@ import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutl
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
+import { DeliveryDining } from "@mui/icons-material";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -132,6 +133,22 @@ const Sidebar = () => {
             >
               Data
             </Typography>
+
+            {/* Quản lý danh mục */}
+            <Item
+              title="Quản lý danh mục"
+              to="/category-manager"
+              icon={<ContactsOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+ <Item
+              title="Quản lý sản phẩm"
+              to="/product-manager"
+              icon={<DeliveryDining />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <Item
               title="Manage Team"
               to="/team"

@@ -85,7 +85,7 @@ const Sidebar = () => {
                                 ml="15px"
                             >
                                 <Typography variant="h3" color={colors.grey[100]}>
-                                    ADMINIS
+                                    ADMIN
                                 </Typography>
                                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                                     <MenuOutlinedIcon />
@@ -158,6 +158,13 @@ const Sidebar = () => {
                             selected={selected}
                             setSelected={setSelected}
                         />
+                         <Item
+                            title="Quản lý khuyến mãi"
+                            to="/promotion-manager"
+                            icon={<ContactsOutlinedIcon />}
+                            selected={selected}
+                            setSelected={setSelected}
+                        />
                         <Item
                             title="Quản lý sản phẩm"
                             to="/product-manager"
@@ -167,21 +174,15 @@ const Sidebar = () => {
                         />
                         <Item
                             title="Quản lí người dùng"
-                            to="/team"
+                            to="/user-manager"
                             icon={<PeopleOutlinedIcon />}
                             selected={selected}
                             setSelected={setSelected}
                         />
-                        <Item
-                            title="Quản lí khuyến mãi"
-                            to="/promotion-manager"
-                            icon={<ContactsOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
-                        />
+                      
                         <Item
                             title="Quản lí đơn hàng"
-                            to="/invoices"
+                            to="/order-manager"
                             icon={<ReceiptOutlinedIcon />}
                             selected={selected}
                             setSelected={setSelected}

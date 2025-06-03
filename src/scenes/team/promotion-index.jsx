@@ -4,44 +4,38 @@ import {
   useTheme,
   Button,
   CircularProgress,
+  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import {
-  getPromotions,
-  createPromotion,
-  updatePromotion,
+  fetchAllPromotions,
+  fetchPromotionById,
   deletePromotion,
-} from "../../api/storePromotionAPI.js";
+} from "../../api/storePromotionAPI";
 
 const PromotionManager = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPromotion, setSelectedPromotion] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [editingPromotion, setEditingPromotion] = useState(null);
-  const [formData, setFormData] = useState({
-    code: "",
-    description: "",
-    discountAmount: "",
-    startDate: "",
-    endDate: "",
-    minPurchaseAmount: "",
-    maxUsage: "",
-  });
+  useEffect(() => {
+    loadPromotions();
+  }, []);
 
-  const fetchPromotions = async () => {
+  const loadPromotions = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await getPromotions();
+      const data = await fetchAllPromotions();
       setPromotions(data);
     } catch (error) {
       console.error("Failed to fetch promotions:", error);
@@ -50,171 +44,95 @@ const PromotionManager = () => {
     }
   };
 
-  useEffect(() => {
-    fetchPromotions();
-  }, []);
-
-  const handleOpenCreate = () => {
-    setEditingPromotion(null);
-    setFormData({
-      code: "",
-      description: "",
-      discountAmount: "",
-      startDate: "",
-      endDate: "",
-      minPurchaseAmount: "",
-      maxUsage: "",
-    });
-    setOpenDialog(true);
-  };
-
-  const handleOpenEdit = (promotion) => {
-    setEditingPromotion(promotion);
-    setFormData({
-      code: promotion.code,
-      description: promotion.description || "",
-      discountAmount: promotion.discountAmount || "",
-      startDate: promotion.startDate?.split("T")[0] || "",
-      endDate: promotion.endDate?.split("T")[0] || "",
-      minPurchaseAmount: promotion.minPurchaseAmount || "",
-      maxUsage: promotion.maxUsage || "",
-    });
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSave = async () => {
+  const handleViewDetails = async (id) => {
+    setDetailLoading(true);
     try {
-      if (editingPromotion) {
-        const updated = await updatePromotion(editingPromotion.promotionId, formData);
-        setPromotions((prev) =>
-          prev.map((promo) =>
-            promo.promotionId === updated.promotionId ? updated : promo
-          )
-        );
-      } else {
-        const created = await createPromotion(formData);
-        setPromotions((prev) => [...prev, created]);
+      const data = await fetchPromotionById(id);
+      setSelectedPromotion(data);
+    } catch (error) {
+      console.error("Failed to fetch promotion:", error);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleDeletePromotion = async (id) => {
+    if (window.confirm("Are you sure you want to delete this promotion?")) {
+      try {
+        await deletePromotion(id);
+        loadPromotions();
+      } catch (error) {
+        console.error("Failed to delete promotion:", error);
       }
-      setOpenDialog(false);
-    } catch (error) {
-      console.error("Failed to save promotion:", error);
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deletePromotion(id);
-      setPromotions((prev) => prev.filter((promo) => promo.promotionId !== id));
-    } catch (error) {
-      console.error("Failed to delete promotion:", error);
-    }
-  };
+  const handleCloseDialog = () => setSelectedPromotion(null);
 
   const columns = [
-    { field: "promotionId", headerName: "ID", width: 70 },
+    { field: "promotionId", headerName: "ID", width: 80 },
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "description", headerName: "Description", flex: 1.5 },
     {
-      field: "code",
-      headerName: "Code",
-      flex: 1,
-      cellClassName: "name-column--cell",
-    },
-    {
-      field: "description",
-      headerName: "Description",
-      flex: 2,
-    },
-    {
-      field: "discountAmount",
-      headerName: "Discount Amount",
-      flex: 1,
+      field: "discountPercentage",
+      headerName: "Discount (%)",
+      width: 130,
+      valueFormatter: ({ value }) => `${value}%`,
     },
     {
       field: "startDate",
       headerName: "Start Date",
-      flex: 1,
-      valueFormatter: (params) =>
-        params.value ? new Date(params.value).toLocaleDateString() : "",
+      flex: 1.2,
+      valueFormatter: ({ value }) => new Date(value).toLocaleDateString(),
     },
     {
       field: "endDate",
       headerName: "End Date",
-      flex: 1,
-      valueFormatter: (params) =>
-        params.value ? new Date(params.value).toLocaleDateString() : "",
-    },
-    {
-      field: "minPurchaseAmount",
-      headerName: "Min Purchase",
-      flex: 1,
-    },
-    {
-      field: "maxUsage",
-      headerName: "Max Usage",
-      flex: 1,
+      flex: 1.2,
+      valueFormatter: ({ value }) => new Date(value).toLocaleDateString(),
     },
     {
       field: "actions",
       headerName: "Actions",
-      width: 180,
-      sortable: false,
+      width: 200,
       renderCell: ({ row }) => (
-        <Box display="flex" gap={1}>
+        <>
           <Button
             variant="contained"
-            color="primary"
             size="small"
-            onClick={() => handleOpenEdit(row)}
+            sx={{ mr: 1 }}
+            onClick={() => handleViewDetails(row.promotionId)}
           >
-            Edit
+            View
           </Button>
           <Button
-            variant="contained"
+            variant="outlined"
             color="error"
             size="small"
-            onClick={() => handleDelete(row.promotionId)}
+            onClick={() => handleDeletePromotion(row.promotionId)}
           >
             Delete
           </Button>
-        </Box>
+        </>
       ),
     },
   ];
 
   return (
     <Box m="20px">
-      <Header title="PROMOTIONS" subtitle="Manage Promotion Codes" />
-      <Button variant="contained" color="success" onClick={handleOpenCreate}>
-        Add New Promotion
-      </Button>
+      <Header title="PROMOTIONS" subtitle="Manage Store Promotions" />
 
       {loading ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="60vh"
-          mt={2}
-        >
-          <CircularProgress color="secondary" />
+        <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
+          <CircularProgress />
         </Box>
       ) : (
-        <Box
-          mt={2}
-          height="75vh"
+        <Box height="75vh" mt={2}
           sx={{
             "& .MuiDataGrid-root": { border: "none" },
             "& .MuiDataGrid-cell": { borderBottom: "none" },
-            "& .name-column--cell": { color: colors.greenAccent[300] },
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: colors.blueAccent[700],
+              backgroundColor: colors.greenAccent[700],
               borderBottom: "none",
             },
             "& .MuiDataGrid-virtualScroller": {
@@ -222,15 +140,11 @@ const PromotionManager = () => {
             },
             "& .MuiDataGrid-footerContainer": {
               borderTop: "none",
-              backgroundColor: colors.blueAccent[700],
-            },
-            "& .MuiCheckbox-root": {
-              color: `${colors.greenAccent[200]} !important`,
+              backgroundColor: colors.greenAccent[700],
             },
           }}
         >
           <DataGrid
-            checkboxSelection
             rows={promotions}
             columns={columns}
             getRowId={(row) => row.promotionId}
@@ -238,87 +152,30 @@ const PromotionManager = () => {
         </Box>
       )}
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingPromotion ? "Edit Promotion" : "Add New Promotion"}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Code"
-            name="code"
-            value={formData.code}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
-          <TextField
-            margin="dense"
-            label="Description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            rows={2}
-          />
-          <TextField
-            margin="dense"
-            label="Discount Amount"
-            name="discountAmount"
-            type="number"
-            value={formData.discountAmount}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
-          <TextField
-            margin="dense"
-            label="Start Date"
-            name="startDate"
-            type="date"
-            value={formData.startDate}
-            onChange={handleChange}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            required
-          />
-          <TextField
-            margin="dense"
-            label="End Date"
-            name="endDate"
-            type="date"
-            value={formData.endDate}
-            onChange={handleChange}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            required
-          />
-          <TextField
-            margin="dense"
-            label="Minimum Purchase Amount"
-            name="minPurchaseAmount"
-            type="number"
-            value={formData.minPurchaseAmount}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            margin="dense"
-            label="Maximum Usage"
-            name="maxUsage"
-            type="number"
-            value={formData.maxUsage}
-            onChange={handleChange}
-            fullWidth
-          />
+      <Dialog open={!!selectedPromotion} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Promotion Details</DialogTitle>
+        <DialogContent dividers>
+          {detailLoading ? (
+            <CircularProgress />
+          ) : selectedPromotion ? (
+            <>
+              <Typography gutterBottom><strong>ID:</strong> {selectedPromotion.promotionId}</Typography>
+              <Typography gutterBottom><strong>Name:</strong> {selectedPromotion.name}</Typography>
+              <Typography gutterBottom><strong>Description:</strong> {selectedPromotion.description}</Typography>
+              <Typography gutterBottom><strong>Discount:</strong> {selectedPromotion.discountPercentage}%</Typography>
+              <Typography gutterBottom>
+                <strong>Start:</strong> {new Date(selectedPromotion.startDate).toLocaleDateString()}
+              </Typography>
+              <Typography gutterBottom>
+                <strong>End:</strong> {new Date(selectedPromotion.endDate).toLocaleDateString()}
+              </Typography>
+            </>
+          ) : (
+            <Typography>Promotion not found.</Typography>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleSave}>
-            {editingPromotion ? "Update" : "Create"}
-          </Button>
+          <Button onClick={handleCloseDialog}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

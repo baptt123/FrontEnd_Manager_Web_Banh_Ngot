@@ -3,8 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
-import Team from "./scenes/team";
-import Invoices from "./scenes/invoices";
+import Team from "./scenes/team/user-index";
 import Contacts from "./scenes/contacts";
 import Bar from "./scenes/bar";
 import Form from "./scenes/form";
@@ -17,7 +16,9 @@ import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
 import CategoryManager from "./scenes/team/category-index";
 import ProductManager from "./scenes/team/product-index";
+import OrderManager from "./scenes/team/order-index";
 import PromotionManager from "./scenes/team/promotion-index";
+import UserManager from "./scenes/team/user-index";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -32,9 +33,9 @@ function App() {
             <Topbar setIsSidebar={setIsSidebar} />
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/team" element={<Team />} />
+              <Route path="/user-manager" element={<UserManager/>} />
               <Route path="/contacts" element={<Contacts />} />
-              <Route path="/invoices" element={<Invoices />} />
+              <Route path="/order-manager" element={<OrderManager/>} />
               <Route path="/form" element={<Form />} />
               <Route path="/bar" element={<Bar />} />
               <Route path="/pie" element={<Pie />} />
@@ -45,6 +46,7 @@ function App() {
               <Route path="/category-manager" element={<CategoryManager />} />
               <Route path="/product-manager" element={<ProductManager />} />
               <Route path="/promotion-manager" element={<PromotionManager />} />
+
             </Routes>
           </main>
         </div>

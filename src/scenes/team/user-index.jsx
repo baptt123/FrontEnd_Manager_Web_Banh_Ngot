@@ -7,14 +7,14 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { tokens } from "../../theme";
+import { tokens } from "../../theme.js";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
-import Header from "../../components/Header";
+import Header from "../../components/Header.jsx";
 import { getUsers, deleteUser } from "../../api/storeUserAPI.js";
 
-const Team = () => {
+const UserManager= () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [users, setUsers] = useState([]);
@@ -167,4 +167,4 @@ const Team = () => {
   );
 };
 
-export default Team;
+export default UserManager;

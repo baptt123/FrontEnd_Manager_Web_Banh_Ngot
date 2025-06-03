@@ -1,15 +1,52 @@
 import { ResponsiveLine } from "@nivo/line";
 import { useTheme } from "@mui/material";
 import { tokens } from "../theme";
-import { mockLineData as data } from "../data/mockData";
+import { useState, useEffect } from "react";
+import { revenueService } from "../api/storeRevenueAPI";
 
-const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
+const LineChart = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [lineData, setLineData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Lấy dữ liệu doanh thu 6 tháng gần nhất
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 5);
+
+        const data = await revenueService.getRevenueHistory(
+          "MONTHLY",
+          startDate,
+          endDate
+        );
+
+        // Chuyển đổi dữ liệu cho biểu đồ line
+        const transformedData = [
+          {
+            id: "revenue",
+            color: tokens("dark").greenAccent[500],
+            data: data.map((item) => ({
+              x: new Date(item.startDate).toLocaleDateString('vi-VN', { month: 'short' }),
+              y: item.totalRevenue,
+            })),
+          },
+        ];
+
+        setLineData(transformedData);
+      } catch (error) {
+        console.error("Error fetching revenue data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <ResponsiveLine
-      data={data}
+      data={lineData}
       theme={{
         axis: {
           domain: {
@@ -43,7 +80,6 @@ const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
           },
         },
       }}
-      colors={isDashboard ? { datum: "color" } : { scheme: "nivo" }} // added
       margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
       xScale={{ type: "point" }}
       yScale={{
@@ -58,27 +94,24 @@ const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
       axisTop={null}
       axisRight={null}
       axisBottom={{
-        orient: "bottom",
-        tickSize: 0,
+        tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "transportation", // added
+        legend: "Tháng",
         legendOffset: 36,
         legendPosition: "middle",
       }}
       axisLeft={{
-        orient: "left",
-        tickValues: 5, // added
-        tickSize: 3,
+        tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "count", // added
+        legend: "Doanh thu",
         legendOffset: -40,
         legendPosition: "middle",
       }}
       enableGridX={false}
       enableGridY={false}
-      pointSize={8}
+      pointSize={10}
       pointColor={{ theme: "background" }}
       pointBorderWidth={2}
       pointBorderColor={{ from: "serieColor" }}

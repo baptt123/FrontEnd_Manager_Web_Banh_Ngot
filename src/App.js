@@ -17,7 +17,7 @@ import { ColorModeContext, useMode } from "./theme";
 import Calendar from "./scenes/calendar/calendar";
 import CategoryManager from "./scenes/team/category-index";
 import ProductManager from "./scenes/team/product-index";
-
+import PromotionManager from "./scenes/team/promotion-index";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -44,6 +44,7 @@ function App() {
               <Route path="/geography" element={<Geography />} />
               <Route path="/category-manager" element={<CategoryManager />} />
               <Route path="/product-manager" element={<ProductManager />} />
+              <Route path="/promotion-manager" element={<PromotionManager />} />
             </Routes>
           </main>
         </div>

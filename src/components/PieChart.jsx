@@ -1,14 +1,48 @@
 import { ResponsivePie } from "@nivo/pie";
 import { tokens } from "../theme";
 import { useTheme } from "@mui/material";
-import { mockPieData as data } from "../data/mockData";
+import { useState, useEffect } from "react";
+import { revenueService } from "../api/storeRevenueAPI";
 
 const PieChart = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [pieData, setPieData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Lấy dữ liệu doanh thu tháng hiện tại
+        const currentDate = new Date();
+        const data = await revenueService.getMonthlyRevenue(currentDate);
+        
+        // Chuyển đổi dữ liệu cho biểu đồ pie
+        const transformedData = [
+          {
+            id: "COD",
+            label: "Thanh toán khi nhận hàng",
+            value: data.codRevenue || 0,
+            color: "hsl(104, 70%, 50%)",
+          },
+          {
+            id: "ONLINE",
+            label: "Thanh toán online",
+            value: data.onlineRevenue || 0,
+            color: "hsl(291, 70%, 50%)",
+          },
+        ];
+        setPieData(transformedData);
+      } catch (error) {
+        console.error("Error fetching revenue data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <ResponsivePie
-      data={data}
+      data={pieData}
       theme={{
         axis: {
           domain: {

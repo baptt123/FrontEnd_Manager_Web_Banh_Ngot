@@ -1,17 +1,54 @@
 import { useTheme } from "@mui/material";
 import { ResponsiveBar } from "@nivo/bar";
 import { tokens } from "../theme";
-import { mockBarData as data } from "../data/mockData";
+import { useState, useEffect } from "react";
+import { revenueService } from "../api/storeRevenueAPI";
 
 const BarChart = ({ isDashboard = false }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [barData, setBarData] = useState([]);
+  const [productCategories, setProductCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Lấy dữ liệu doanh thu theo sản phẩm trong tháng hiện tại
+        const currentDate = new Date();
+        const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        
+        const response = await revenueService.getRevenueByProducts(startDate, endDate);
+        
+        // Chuyển đổi dữ liệu cho biểu đồ
+        const categories = [...new Set(response.map(item => item.category))];
+        setProductCategories(categories);
+
+        // Nhóm dữ liệu theo tuần
+        const weeklyData = response.reduce((acc, item) => {
+          const weekNumber = `Tuần ${item.weekOfMonth}`;
+          if (!acc[weekNumber]) {
+            acc[weekNumber] = {
+              week: weekNumber,
+            };
+          }
+          acc[weekNumber][item.category] = item.revenue;
+          return acc;
+        }, {});
+
+        setBarData(Object.values(weeklyData));
+      } catch (error) {
+        console.error("Error fetching revenue data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <ResponsiveBar
-      data={data}
+      data={barData}
       theme={{
-        // added
         axis: {
           domain: {
             line: {
@@ -39,8 +76,8 @@ const BarChart = ({ isDashboard = false }) => {
           },
         },
       }}
-      keys={["hot dog", "burger", "sandwich", "kebab", "fries", "donut"]}
-      indexBy="country"
+      keys={productCategories}
+      indexBy="week"
       margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
       padding={0.3}
       valueScale={{ type: "linear" }}
@@ -76,7 +113,7 @@ const BarChart = ({ isDashboard = false }) => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "country", // changed
+        legend: isDashboard ? undefined : "Tuần", 
         legendPosition: "middle",
         legendOffset: 32,
       }}
@@ -84,11 +121,11 @@ const BarChart = ({ isDashboard = false }) => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "food", // changed
+        legend: isDashboard ? undefined : "Doanh thu (VNĐ)", 
         legendPosition: "middle",
         legendOffset: -40,
       }}
-      enableLabel={false}
+      enableLabel={true}
       labelSkipWidth={12}
       labelSkipHeight={12}
       labelTextColor={{
@@ -120,8 +157,9 @@ const BarChart = ({ isDashboard = false }) => {
         },
       ]}
       role="application"
+      ariaLabel="Biểu đồ doanh thu theo danh mục sản phẩm"
       barAriaLabel={function (e) {
-        return e.id + ": " + e.formattedValue + " in country: " + e.indexValue;
+        return e.id + ": " + e.formattedValue + " trong " + e.indexValue;
       }}
     />
   );

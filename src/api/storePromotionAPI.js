@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "/api/store/promotions";
+const API_URL = "http://localhost:8080/api/store/promotions";
 
 export const fetchAllPromotions = async () => {
   const response = await axios.get(`${API_URL}/get-all-promotions`);

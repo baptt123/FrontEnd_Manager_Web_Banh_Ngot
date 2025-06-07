@@ -187,7 +187,13 @@ const Sidebar = () => {
                             selected={selected}
                             setSelected={setSelected}
                         />
-
+                        <Item
+                            title="Quản lí bình luận"
+                            to="/comment-manager"
+                            icon={<ContactsOutlinedIcon />}
+                            selected={selected}
+                            setSelected={setSelected}
+                        />
                         <Typography
                             variant="h6"
                             color={colors.grey[300]}

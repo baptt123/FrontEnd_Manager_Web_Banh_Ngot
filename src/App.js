@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
-import Team from "./scenes/team/user-index";
 import Contacts from "./scenes/contacts";
 import Bar from "./scenes/bar";
 import Form from "./scenes/form";
@@ -19,6 +18,7 @@ import ProductManager from "./scenes/team/product-index";
 import OrderManager from "./scenes/team/order-index";
 import PromotionManager from "./scenes/team/promotion-index";
 import UserManager from "./scenes/team/user-index";
+import CommentManager from "./scenes/team/comment-index";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -46,7 +46,7 @@ function App() {
               <Route path="/category-manager" element={<CategoryManager />} />
               <Route path="/product-manager" element={<ProductManager />} />
               <Route path="/promotion-manager" element={<PromotionManager />} />
-
+              <Route path="/comment-manager" element={<CommentManager />} />
             </Routes>
           </main>
         </div>

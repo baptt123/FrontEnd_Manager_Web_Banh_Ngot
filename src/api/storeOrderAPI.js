@@ -1,33 +1,37 @@
 // src/api/orderAPI.js
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8080/api/orders'; // sửa lại nếu bạn có prefix khác
+const BASE_URL = 'http://localhost:8080/api/orders';
 
-// Lấy tất cả đơn hàng của cửa hàng (storeId mặc định là 1 ở backend)
+const getAuthHeader = () => {
+  const token = localStorage.getItem("token");
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};
+
 export const fetchAllOrdersByStore = async () => {
-  const response = await axios.get(`${BASE_URL}/getallordersbystore`);
+  const response = await axios.get(`${BASE_URL}/getallordersbystore`, getAuthHeader());
   return response.data;
 };
 
-// Lấy chi tiết một đơn hàng theo id
 export const fetchOrderById = async (id) => {
-  const response = await axios.get(`${BASE_URL}/${id}`);
+  const response = await axios.get(`${BASE_URL}/${id}`, getAuthHeader());
   return response.data;
 };
 
-// Tạo đơn hàng mới (dành cho phía quản lý cửa hàng)
 export const createOrder = async (orderData) => {
-  const response = await axios.post(`${BASE_URL}/create-order-store`, orderData);
+  const response = await axios.post(`${BASE_URL}/create-order-store`, orderData, getAuthHeader());
   return response.data;
 };
 
-// Cập nhật đơn hàng theo id
 export const updateOrder = async (id, orderData) => {
-  const response = await axios.put(`${BASE_URL}/${id}`, orderData);
+  const response = await axios.put(`${BASE_URL}/${id}`, orderData, getAuthHeader());
   return response.data;
 };
 
-// Xóa đơn hàng theo id
 export const deleteOrder = async (id) => {
-  await axios.delete(`${BASE_URL}/${id}`);
+  await axios.delete(`${BASE_URL}/${id}`, getAuthHeader());
 };

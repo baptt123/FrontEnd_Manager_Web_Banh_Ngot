@@ -3,23 +3,18 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8080/api/store/users";
 
-// Lấy JWT từ localStorage và tạo header Authorization
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+});
 
-// Lấy danh sách user (đã đính kèm JWT)
+// Lấy danh sách user
 export const getUsers = async () => {
-  const response = await axios.get(`${BASE_URL}/getusers`, getAuthHeader());
+  const response = await axiosInstance.get("/getusers");
   return response.data;
 };
 
-// Xoá user theo ID (đã đính kèm JWT)
+// Xoá user theo ID
 export const deleteUser = async (id) => {
-  await axios.delete(`${BASE_URL}/${id}`, getAuthHeader());
+  await axiosInstance.delete(`/${id}`);
 };

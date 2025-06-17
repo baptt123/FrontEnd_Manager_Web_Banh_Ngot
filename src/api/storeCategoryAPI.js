@@ -1,35 +1,29 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api/store/categories";
-
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8080/api/store/categories",
+  withCredentials: true,
+});
 
 // Lấy danh sách category
 export const getCategories = async () => {
-  const response = await axios.get(BASE_URL, getAuthHeader());
+  const response = await axiosInstance.get("/");
   return response.data;
 };
 
 // Tạo mới category
 export const createCategory = async (category) => {
-  const response = await axios.post(BASE_URL, category, getAuthHeader());
+  const response = await axiosInstance.post("/", category);
   return response.data;
 };
 
 // Cập nhật category theo id
 export const updateCategory = async (id, category) => {
-  const response = await axios.put(`${BASE_URL}/${id}`, category, getAuthHeader());
+  const response = await axiosInstance.put(`/${id}`, category);
   return response.data;
 };
 
 // Xóa category (soft delete)
 export const deleteCategory = async (id) => {
-  await axios.delete(`${BASE_URL}/${id}`, getAuthHeader());
+  await axiosInstance.delete(`/${id}`);
 };

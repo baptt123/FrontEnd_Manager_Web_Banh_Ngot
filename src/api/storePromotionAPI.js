@@ -1,36 +1,30 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/store/promotions";
-
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8080/api/store/promotions",
+  withCredentials: true,
+});
 
 export const fetchAllPromotions = async () => {
-  const response = await axios.get(`${API_URL}/get-all-promotions`, getAuthHeader());
+  const response = await axiosInstance.get("/get-all-promotions");
   return response.data;
 };
 
 export const fetchPromotionById = async (id) => {
-  const response = await axios.get(`${API_URL}/${id}/get-promotion`, getAuthHeader());
+  const response = await axiosInstance.get(`/${id}/get-promotion`);
   return response.data;
 };
 
 export const createPromotion = async (promotion) => {
-  const response = await axios.post(`${API_URL}/create-promotion`, promotion, getAuthHeader());
+  const response = await axiosInstance.post("/create-promotion", promotion);
   return response.data;
 };
 
 export const updatePromotion = async (id, promotion) => {
-  const response = await axios.put(`${API_URL}/${id}/update-promotion`, promotion, getAuthHeader());
+  const response = await axiosInstance.put(`/${id}/update-promotion`, promotion);
   return response.data;
 };
 
 export const deletePromotion = async (id) => {
-  await axios.delete(`${API_URL}/${id}/delete-promotion`, getAuthHeader());
+  await axiosInstance.delete(`/${id}/delete-promotion`);
 };

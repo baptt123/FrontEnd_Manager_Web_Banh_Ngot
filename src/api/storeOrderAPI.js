@@ -1,37 +1,31 @@
 // src/api/orderAPI.js
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8080/api/orders';
-
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:8080/api/orders',
+  withCredentials: true,
+});
 
 export const fetchAllOrdersByStore = async () => {
-  const response = await axios.get(`${BASE_URL}/getallordersbystore`, getAuthHeader());
+  const response = await axiosInstance.get('/getallordersbystore');
   return response.data;
 };
 
 export const fetchOrderById = async (id) => {
-  const response = await axios.get(`${BASE_URL}/${id}`, getAuthHeader());
+  const response = await axiosInstance.get(`/${id}`);
   return response.data;
 };
 
 export const createOrder = async (orderData) => {
-  const response = await axios.post(`${BASE_URL}/create-order-store`, orderData, getAuthHeader());
+  const response = await axiosInstance.post('/create-order-store', orderData);
   return response.data;
 };
 
 export const updateOrder = async (id, orderData) => {
-  const response = await axios.put(`${BASE_URL}/${id}`, orderData, getAuthHeader());
+  const response = await axiosInstance.put(`/${id}`, orderData);
   return response.data;
 };
 
 export const deleteOrder = async (id) => {
-  await axios.delete(`${BASE_URL}/${id}`, getAuthHeader());
+  await axiosInstance.delete(`/${id}`);
 };

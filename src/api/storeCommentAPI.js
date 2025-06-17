@@ -1,27 +1,21 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api/comments";
-
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8080/api/comments",
+  withCredentials: true,
+});
 
 export const getCommentsStore = async () => {
-  const response = await axios.get(`${BASE_URL}/comments-store`, getAuthHeader());
+  const response = await axiosInstance.get("/comments-store");
   return response.data;
 };
 
 export const updateComment = async (id, data) => {
-  const response = await axios.put(`${BASE_URL}/${id}`, data, getAuthHeader());
+  const response = await axiosInstance.put(`/${id}`, data);
   return response.data;
 };
 
 export const deleteComment = async (id) => {
-  const response = await axios.delete(`${BASE_URL}/${id}`, getAuthHeader());
+  const response = await axiosInstance.delete(`/${id}`);
   return response.data;
 };

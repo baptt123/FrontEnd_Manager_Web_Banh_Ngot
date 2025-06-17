@@ -6,7 +6,7 @@ const axiosInstance = axios.create({
 });
 
 export const getProducts = async () => {
-  const response = await axiosInstance.get("/");
+  const response = await axiosInstance.get("/all-products");
   return response.data;
 };
 

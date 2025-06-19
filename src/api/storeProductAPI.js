@@ -11,7 +11,7 @@ export const getProducts = async () => {
 };
 
 export const createProduct = async (productData) => {
-  const response = await axiosInstance.post("/", productData);
+  const response = await axiosInstance.post("/create-product", productData);
   return response.data;
 };
 

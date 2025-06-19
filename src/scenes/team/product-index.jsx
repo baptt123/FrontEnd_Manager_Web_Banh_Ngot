@@ -31,7 +31,7 @@ const ProductManager = () => {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
-    image: "",
+    imageUrl: "",
     description: "",
     quantity: "",
     categoryId: "",
@@ -58,7 +58,7 @@ const ProductManager = () => {
     setFormData({
       name: "",
       price: "",
-      image: "",
+      imageUrl: "",
       description: "",
       quantity: "",
       categoryId: "",

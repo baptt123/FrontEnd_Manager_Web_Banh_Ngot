@@ -1,22 +1,25 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api/store/products";
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8080/api/store/products",
+  withCredentials: true,
+});
 
 export const getProducts = async () => {
-  const response = await axios.get(BASE_URL);
+  const response = await axiosInstance.get("/all-products");
   return response.data;
 };
 
 export const createProduct = async (productData) => {
-  const response = await axios.post(BASE_URL, productData);
+  const response = await axiosInstance.post("/create-product", productData);
   return response.data;
 };
 
 export const updateProduct = async (id, productData) => {
-  const response = await axios.put(`${BASE_URL}/${id}`, productData);
+  const response = await axiosInstance.put(`/${id}`, productData);
   return response.data;
 };
 
 export const deleteProduct = async (id) => {
-  await axios.delete(`${BASE_URL}/${id}`);
+  await axiosInstance.delete(`/${id}`);
 };

@@ -1,12 +1,20 @@
+// storeUserAPI.js
 import axios from "axios";
 
 const BASE_URL = "http://localhost:8080/api/store/users";
 
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+});
+
+// Lấy danh sách user
 export const getUsers = async () => {
-  const response = await axios.get(`${BASE_URL}/getusers`);
+  const response = await axiosInstance.get("/getusers");
   return response.data;
 };
 
+// Xoá user theo ID
 export const deleteUser = async (id) => {
-  await axios.delete(`${BASE_URL}/${id}`);
+  await axiosInstance.delete(`/${id}`);
 };

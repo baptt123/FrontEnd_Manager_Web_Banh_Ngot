@@ -1,4 +1,3 @@
-// src/pages/orders/OrderManager.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -10,13 +9,15 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import {
   fetchAllOrdersByStore,
-  fetchOrderById,
+  updateOrder,
 } from "../../api/storeOrderAPI";
 
 const OrderManager = () => {
@@ -27,8 +28,9 @@ const OrderManager = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
+  const [updating, setUpdating] = useState(false);
 
-  // Fetch all orders when component mounts
   useEffect(() => {
     loadOrders();
   }, []);
@@ -45,19 +47,34 @@ const OrderManager = () => {
     }
   };
 
-  const handleViewDetails = async (orderId) => {
-    try {
-      setDetailLoading(true);
-      const data = await fetchOrderById(orderId);
-      setSelectedOrder(data);
-    } catch (error) {
-      console.error("Failed to fetch order details:", error);
-    } finally {
-      setDetailLoading(false);
-    }
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    setNewStatus(order.status);
   };
 
-  const handleCloseDialog = () => setSelectedOrder(null);
+  const handleCloseDialog = () => {
+    setSelectedOrder(null);
+    setNewStatus("");
+  };
+
+  const handleStatusChange = async () => {
+    if (!selectedOrder) return;
+    try {
+      setUpdating(true);
+      await updateOrder(selectedOrder.orderId, {
+        status: newStatus,
+        paymentMethod: selectedOrder.paymentMethod,
+        totalAmount: selectedOrder.totalAmount,
+        deleted: false,
+      });
+      await loadOrders();
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Failed to update order:", error);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const columns = [
     { field: "orderId", headerName: "Order ID", width: 100 },
@@ -80,95 +97,110 @@ const OrderManager = () => {
       headerName: "Actions",
       width: 180,
       renderCell: ({ row }) => (
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => handleViewDetails(row.orderId)}
-        >
-          View Details
-        </Button>
+          <Button
+              variant="contained"
+              size="small"
+              onClick={() => handleViewDetails(row)}
+          >
+            View Details
+          </Button>
       ),
     },
   ];
 
   return (
-    <Box m="20px">
-      <Header title="ORDERS" subtitle="Manage Customer Orders" />
+      <Box m="20px">
+        <Header title="ORDERS" subtitle="Manage Customer Orders" />
 
-      {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Box
-          height="75vh"
-          mt={2}
-          sx={{
-            "& .MuiDataGrid-root": { border: "none" },
-            "& .MuiDataGrid-cell": { borderBottom: "none" },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: colors.blueAccent[700],
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              backgroundColor: colors.primary[400],
-            },
-            "& .MuiDataGrid-footerContainer": {
-              borderTop: "none",
-              backgroundColor: colors.blueAccent[700],
-            },
-          }}
-        >
-          <DataGrid
-            rows={orders}
-            columns={columns}
-            getRowId={(row) => row.orderId}
-          />
-        </Box>
-      )}
+        {loading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
+              <CircularProgress />
+            </Box>
+        ) : (
+            <Box
+                height="75vh"
+                mt={2}
+                sx={{
+                  "& .MuiDataGrid-root": { border: "none" },
+                  "& .MuiDataGrid-cell": { borderBottom: "none" },
+                  "& .MuiDataGrid-columnHeaders": {
+                    backgroundColor: colors.blueAccent[700],
+                    borderBottom: "none",
+                  },
+                  "& .MuiDataGrid-virtualScroller": {
+                    backgroundColor: colors.primary[400],
+                  },
+                  "& .MuiDataGrid-footerContainer": {
+                    borderTop: "none",
+                    backgroundColor: colors.blueAccent[700],
+                  },
+                }}
+            >
+              <DataGrid
+                  rows={orders}
+                  columns={columns}
+                  getRowId={(row) => row.orderId}
+              />
+            </Box>
+        )}
 
-      {/* Order Details Dialog */}
-      <Dialog open={!!selectedOrder} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>Order Details</DialogTitle>
-        <DialogContent dividers>
-          {detailLoading ? (
-            <CircularProgress />
-          ) : selectedOrder ? (
-            <>
-              <Typography gutterBottom><strong>Order ID:</strong> {selectedOrder.orderId}</Typography>
-              <Typography gutterBottom><strong>Status:</strong> {selectedOrder.status}</Typography>
-              <Typography gutterBottom><strong>Payment:</strong> {selectedOrder.paymentMethod}</Typography>
-              <Typography gutterBottom>
-                <strong>Total:</strong> {selectedOrder.totalAmount.toLocaleString()} VND
-              </Typography>
-              <Typography gutterBottom>
-                <strong>Created At:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}
-              </Typography>
-              <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: "bold" }}>Order Items:</Typography>
-              <Box sx={{ pl: 2 }}>
-                {selectedOrder.orderDetails?.map((item, index) => (
-                  <Box key={index} sx={{ mb: 1 }}>
-                    <Typography>
-                      - {item.productName} x{item.quantity} — {item.price.toLocaleString()} VND
-                    </Typography>
-                    {item.customization && (
-                      <Typography sx={{ ml: 2, fontStyle: "italic" }}>
-                        Custom: {item.customization}
-                      </Typography>
-                    )}
+        <Dialog open={!!selectedOrder} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+          <DialogTitle>Order Details</DialogTitle>
+          <DialogContent dividers>
+            {detailLoading ? (
+                <CircularProgress />
+            ) : selectedOrder ? (
+                <>
+                  <Typography gutterBottom><strong>Order ID:</strong> {selectedOrder.orderId}</Typography>
+                  <Typography gutterBottom><strong>Status:</strong> {selectedOrder.status}</Typography>
+                  <Typography gutterBottom><strong>Payment:</strong> {selectedOrder.paymentMethod}</Typography>
+                  <Typography gutterBottom>
+                    <strong>Total:</strong> {selectedOrder.totalAmount.toLocaleString()} VND
+                  </Typography>
+                  <Typography gutterBottom>
+                    <strong>Created At:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: "bold" }}>Update Status:</Typography>
+                  <Select
+                      fullWidth
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                      sx={{ my: 2 }}
+                  >
+                    <MenuItem value="PENDING">PENDING</MenuItem>
+                    <MenuItem value="CONFIRMED">CONFIRMED</MenuItem>
+                    <MenuItem value="SHIPPED">SHIPPED</MenuItem>
+                    <MenuItem value="DELIVERED">DELIVERED</MenuItem>
+                    <MenuItem value="CANCELED">CANCELED</MenuItem>
+                  </Select>
+                  <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: "bold" }}>Order Items:</Typography>
+                  <Box sx={{ pl: 2 }}>
+                    {selectedOrder.orderDetails?.map((item, index) => (
+                        <Box key={index} sx={{ mb: 1 }}>
+                          <Typography>
+                            - {item.productName} x{item.quantity} — {item.price.toLocaleString()} VND
+                          </Typography>
+                          {item.customization && (
+                              <Typography sx={{ ml: 2, fontStyle: "italic" }}>
+                                Custom: {item.customization}
+                              </Typography>
+                          )}
+                        </Box>
+                    ))}
                   </Box>
-                ))}
-              </Box>
-            </>
-          ) : (
-            <Typography>Order not found.</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+                </>
+            ) : (
+                <Typography>Order not found.</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Close</Button>
+            <Button variant="contained" onClick={handleStatusChange} disabled={updating}>
+              {updating ? "Updating..." : "Update Status"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
   );
 };
 

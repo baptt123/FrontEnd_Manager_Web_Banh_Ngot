@@ -125,10 +125,10 @@ const Sidebar = () => {
                         <Typography variant="h6" color={colors.grey[300]} className="section-header">
                             Data
                         </Typography>
-                        <Item title="Quản lý danh mục" to="/category-manager" icon={<ContactsOutlinedIcon />} selected={selected} setSelected={setSelected} />
+                        {/*<Item title="Quản lý danh mục" to="/category-manager" icon={<ContactsOutlinedIcon />} selected={selected} setSelected={setSelected} />*/}
                         <Item title="Quản lý khuyến mãi" to="/promotion-manager" icon={<ContactsOutlinedIcon />} selected={selected} setSelected={setSelected} />
                         <Item title="Quản lý sản phẩm" to="/product-manager" icon={<DeliveryDining />} selected={selected} setSelected={setSelected} />
-                        <Item title="Quản lí người dùng" to="/user-manager" icon={<PeopleOutlinedIcon />} selected={selected} setSelected={setSelected} />
+                        {/*<Item title="Quản lí người dùng" to="/user-manager" icon={<PeopleOutlinedIcon />} selected={selected} setSelected={setSelected} />*/}
                         <Item title="Quản lí đơn hàng" to="/order-manager" icon={<ReceiptOutlinedIcon />} selected={selected} setSelected={setSelected} />
                         <Item title="Quản lí bình luận" to="/comment-manager" icon={<ContactsOutlinedIcon />} selected={selected} setSelected={setSelected} />
                         <Typography variant="h6" color={colors.grey[300]} className="section-header">

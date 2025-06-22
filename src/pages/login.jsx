@@ -56,7 +56,7 @@ const LoginPage = () => {
                 {errorMsg && <div className="error">{errorMsg}</div>}
                 <input
                     type="text"
-                    placeholder="email address"
+                    placeholder="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required

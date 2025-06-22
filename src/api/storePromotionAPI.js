@@ -10,10 +10,10 @@ export const fetchAllPromotions = async () => {
   return response.data;
 };
 
-export const fetchPromotionById = async (id) => {
-  const response = await axiosInstance.get(`/${id}/get-promotion`);
-  return response.data;
-};
+// export const fetchPromotionById = async (id) => {
+//   const response = await axiosInstance.get(`/${id}/get-promotion`);
+//   return response.data;
+// };
 
 export const createPromotion = async (promotion) => {
   const response = await axiosInstance.post("/create-promotion", promotion);

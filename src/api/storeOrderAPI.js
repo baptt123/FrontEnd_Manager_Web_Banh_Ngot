@@ -11,21 +11,10 @@ export const fetchAllOrdersByStore = async () => {
   return response.data;
 };
 
-export const fetchOrderById = async (id) => {
-  const response = await axiosInstance.get(`/${id}`);
-  return response.data;
-};
-
-export const createOrder = async (orderData) => {
-  const response = await axiosInstance.post('/create-order-store', orderData);
-  return response.data;
-};
 
 export const updateOrder = async (id, orderData) => {
-  const response = await axiosInstance.put(`/${id}`, orderData);
+  const response = await axiosInstance.put(`/${id}/update-status`, orderData,);
   return response.data;
 };
 
-export const deleteOrder = async (id) => {
-  await axiosInstance.delete(`/${id}`);
-};
+
